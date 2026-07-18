@@ -7,10 +7,8 @@ app.get("/", (req, res) => {
 });
 
 app.get("/health", (req, res) => {
-    res.json({
-        status: "UP",
-        service: "devops-ci-cd-lab",
-        timestamp: new Date()
+    res.status(200).json({
+        status: "UP"
     });
 });
 

@@ -47,7 +47,20 @@ pipeline {
                 echo "Running Image Version: ${IMAGE_TAG}"
             }
         }
-        
+
+
+        stage('Health Check') {
+            steps {
+                sh '''
+                    echo "Waiting for application..."
+                    sleep 5
+
+                    curl --fail http://host.docker.internal:3000/health
+                '''
+            }
+        }
+
+
     }
 
     post {
