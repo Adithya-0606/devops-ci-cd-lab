@@ -2,28 +2,41 @@ pipeline {
     agent any
 
     stages {
+
         stage('Build Docker Image') {
             steps {
-                sh 'pwd'
-                sh 'ls -la'
-                sh 'docker --version'
                 sh 'docker build -t devops-ci-cd-app:latest ./app'
             }
         }
 
-        stage('List Images') {
+        stage('Deploy Container') {
             steps {
-                sh 'docker images'
+                sh '''
+                    docker stop devops-app || true
+                    docker rm devops-app || true
+
+                    docker run -d \
+                        --name devops-app \
+                        -p 3000:3000 \
+                        devops-ci-cd-app:latest
+                '''
+            }
+        }
+
+        stage('Verify Deployment') {
+            steps {
+                sh 'docker ps'
             }
         }
     }
 
     post {
         success {
-            echo 'Pipeline completed successfully!'
+            echo 'Deployment Successful!'
         }
+
         failure {
-            echo 'Pipeline failed!'
+            echo 'Deployment Failed!'
         }
     }
 }
