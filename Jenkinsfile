@@ -3,9 +3,22 @@ pipeline {
 
     stages {
 
+        stage('Get Version') {
+            steps {
+                script {
+                    env.IMAGE_TAG = sh(
+                        script: "git rev-parse --short HEAD",
+                        returnStdout: true
+                    ).trim()
+
+                    echo "Image Tag: ${env.IMAGE_TAG}"
+                }
+            }
+        }
+
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t devops-ci-cd-app:latest ./app'
+                sh "docker build -t devops-ci-cd-app:${IMAGE_TAG} ./app"
             }
         }
 
@@ -16,9 +29,9 @@ pipeline {
                     docker rm devops-app || true
 
                     docker run -d \
-                        --name devops-app \
-                        -p 3000:3000 \
-                        devops-ci-cd-app:latest
+                    --name devops-app \
+                    -p 3000:3000 \
+                    devops-ci-cd-app:${IMAGE_TAG}
                 '''
             }
         }
@@ -28,6 +41,13 @@ pipeline {
                 sh 'docker ps'
             }
         }
+
+        stage('Show Version') {
+            steps {
+                echo "Running Image Version: ${IMAGE_TAG}"
+            }
+        }
+        
     }
 
     post {
