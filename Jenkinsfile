@@ -1,6 +1,11 @@
 pipeline {
     agent any
 
+    environment {
+        DISCORD_WEBHOOK = credentials('discord-webhook')
+    }
+
+
     stages {
 
         stage('Get Version') {
@@ -15,6 +20,23 @@ pipeline {
                 }
             }
         }
+
+        stage('Install Dependencies') {
+            steps {
+                dir('app') {
+                    sh 'npm install'
+                }
+            }
+        }
+
+        stage('Run Tests') {
+            steps {
+                dir('app') {
+                    sh 'npm test'
+                }
+            }
+        }
+
 
         stage('Build Docker Image') {
             steps {
@@ -64,12 +86,24 @@ pipeline {
     }
 
     post {
+
         success {
-            echo 'Deployment Successful!'
+            sh '''
+            curl -H "Content-Type: application/json" \
+            -X POST \
+            -d "{\"content\":\"✅ Build #${BUILD_NUMBER} succeeded!\\nProject: ${JOB_NAME}\\nCommit: ${GIT_COMMIT}\"}" \
+            $DISCORD_WEBHOOK
+            '''
         }
 
         failure {
-            echo 'Deployment Failed!'
+            sh '''
+            curl -H "Content-Type: application/json" \
+            -X POST \
+            -d "{\"content\":\"❌ Build #${BUILD_NUMBER} failed!\\nProject: ${JOB_NAME}\"}" \
+            $DISCORD_WEBHOOK
+            '''
         }
+
     }
 }
