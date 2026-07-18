@@ -2,19 +2,16 @@ pipeline {
     agent any
 
     stages {
-        stage('Checkout') {
-            steps {
-                checkout scm
-            }
-        }
-
         stage('Build Docker Image') {
             steps {
+                sh 'pwd'
+                sh 'ls -la'
+                sh 'docker --version'
                 sh 'docker build -t devops-ci-cd-app:latest ./app'
             }
         }
 
-        stage('List Docker Images') {
+        stage('List Images') {
             steps {
                 sh 'docker images'
             }
@@ -23,11 +20,10 @@ pipeline {
 
     post {
         success {
-            echo '✅ Pipeline completed successfully!'
+            echo 'Pipeline completed successfully!'
         }
-
         failure {
-            echo '❌ Pipeline failed.'
+            echo 'Pipeline failed!'
         }
     }
 }
