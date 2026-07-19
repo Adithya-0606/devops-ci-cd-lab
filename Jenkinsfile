@@ -44,6 +44,33 @@ pipeline {
             }
         }
 
+        stage('Push Docker Image') {
+            steps {
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: 'dockerhub-creds',
+                        usernameVariable: 'DOCKER_USER',
+                        passwordVariable: 'DOCKER_PASS'
+                    )
+                ]) {
+                    sh '''
+                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+
+                        docker tag devops-ci-cd-app:${IMAGE_TAG} $DOCKER_USER/devops-ci-cd-lab:${IMAGE_TAG}
+
+                        docker tag devops-ci-cd-app:${IMAGE_TAG} $DOCKER_USER/devops-ci-cd-lab:latest
+
+                        docker push $DOCKER_USER/devops-ci-cd-lab:${IMAGE_TAG}
+
+                        docker push $DOCKER_USER/devops-ci-cd-lab:latest
+
+                        docker logout
+                    '''
+                }
+            }
+        }
+
+
         stage('Deploy Container') {
             steps {
                 sh '''
