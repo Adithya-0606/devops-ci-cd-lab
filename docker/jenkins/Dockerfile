@@ -2,8 +2,12 @@ FROM jenkins/jenkins:lts
 
 USER root
 
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && \
+    apt-get install -y \
     docker.io \
-    && apt-get clean
+    curl \
+    git \
+    nodejs \
+    npm
 
 USER jenkins

@@ -86,24 +86,12 @@ pipeline {
     }
 
     post {
-
         success {
-            sh '''
-            curl -H "Content-Type: application/json" \
-            -X POST \
-            -d "{\"content\":\"✅ Build #${BUILD_NUMBER} succeeded!\\nProject: ${JOB_NAME}\\nCommit: ${GIT_COMMIT}\"}" \
-            $DISCORD_WEBHOOK
-            '''
+            sh "./scripts/notify.sh success"
         }
 
         failure {
-            sh '''
-            curl -H "Content-Type: application/json" \
-            -X POST \
-            -d "{\"content\":\"❌ Build #${BUILD_NUMBER} failed!\\nProject: ${JOB_NAME}\"}" \
-            $DISCORD_WEBHOOK
-            '''
+            sh "./scripts/notify.sh failure"
         }
-
     }
 }
